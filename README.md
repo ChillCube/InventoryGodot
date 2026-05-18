@@ -32,7 +32,8 @@ push-all-addons
 
 
 ## Used By
-2 other ChillCube addon(s) depend on this:
+3 other ChillCube addon(s) depend on this:
 
+- [InventoryGrid2D](https://github.com/ChillCube/InventoryGrid2D)
 - [ItemFrame2D](https://github.com/ChillCube/ItemFrame2D)
 - [SimpleCraftingRecipees](https://github.com/ChillCube/SimpleCraftingRecipees)
