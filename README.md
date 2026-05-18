@@ -30,3 +30,8 @@ push-all-addons
 ```
 
 
+
+## Used By
+1 other ChillCube addon(s) depend on this:
+
+- [SimpleCraftingRecipees](https://github.com/ChillCube/SimpleCraftingRecipees)
