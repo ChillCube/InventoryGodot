@@ -436,5 +436,5 @@ func print_inventory() -> void: ## Print inventory contents to console (debuggin
 
 func _notification(what: int) -> void: ## Handle resource notifications.
 	if what == NOTIFICATION_PREDELETE:
-		# Cleanup before deletion
-		clear()
+		items = []
+		item_counts = {}
