@@ -1,5 +1,5 @@
 # InventoryGodot API Reference
-Generated: 2026-05-18
+Generated: 2026-05-20
 
 Provides an inventory and item resource used for inventory management
 
@@ -74,11 +74,29 @@ Provides an inventory and item resource used for inventory management
 **Inherits:** [Resource](https://docs.godotengine.org/en/stable/classes/class_resource.html)
 
 
+### ⚙️ Inspector Variables (Exported)
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| **Name** | `String;` | `-` | Category display name (e.g. "Weapon", "Armour", "Consumable") |
+| **Icon** | `Texture2D;` | `-` | Icon used to represent this category in UI |
+| **Description** | `String;` | `-` | Tooltip or flavour text describing the category |
+
 ---
 
 ## Class: Item
 **Inherits:** [Resource](https://docs.godotengine.org/en/stable/classes/class_resource.html)
 
+
+### ⚙️ Inspector Variables (Exported)
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| **category** | `ItemCategory` | `-` | Optional category for filtering/grouping (e.g. Weapon, Consumable) |
+| **name** | `String` | `-` | Display name shown in UI |
+| **description** | `String` | `-` | Flavour or tooltip text |
+| **sprite** | `Texture2D` | `-` | Icon displayed in inventory slots |
+| **stats** | `Stats` | `-` | Optional Stats resource (e.g. damage, defence) attached to this item |
+| **value** | `float` | `-` | Monetary/trade value of the item |
+| **use_trigger_nodes** | `Array[PackedScene]` | `[]` | Scenes instantiated and attached to the user when item.use() is called |
 
 ---
 

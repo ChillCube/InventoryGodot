@@ -2,13 +2,13 @@
 extends Resource
 class_name Item
 
-@export var category: ItemCategory
-@export var name: String
-@export var description: String
-@export var sprite: Texture2D
-@export var stats: Stats
-@export var value: float
-@export var use_trigger_nodes: Array[PackedScene] = []
+@export var category: ItemCategory ## Optional category for filtering/grouping (e.g. Weapon, Consumable)
+@export var name: String ## Display name shown in UI
+@export var description: String ## Flavour or tooltip text
+@export var sprite: Texture2D ## Icon displayed in inventory slots
+@export var stats: Stats ## Optional Stats resource (e.g. damage, defence) attached to this item
+@export var value: float ## Monetary/trade value of the item
+@export var use_trigger_nodes: Array[PackedScene] = [] ## Scenes instantiated and attached to the user when item.use() is called
 
 ## Uses the item, instantiating all trigger nodes and attaching them to the user
 ## Returns an array of instantiated nodes for further management
