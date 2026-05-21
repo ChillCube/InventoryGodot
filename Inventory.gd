@@ -17,8 +17,14 @@ enum OverflowMode {
 @export var inventory_name: String = "Default Inventory" ## Name of this inventory for identification
 @export var overflow_mode: OverflowMode = OverflowMode.ITEM_SETTING ## Overrides each item's overflow_to_new_stack when not set to ITEM_SETTING
 
+@export_group("Persistence")
+@export var save_path: String = "" ## File path for JSON persistence (e.g. "user://inventory.json"). Leave empty to disable.
+@export var auto_save: bool = true ## Automatically save to save_path whenever items change.
+
 var item_counts: Dictionary ## Tracks item counts keyed by item key (runtime cache)
 var is_initialized: bool = false ## Whether inventory has been initialized
+var _runtime_loaded: bool = false ## Whether auto-load has already been attempted this session
+var _loading: bool = false ## True while load_from_data is running, suppresses auto-save
 
 signal item_added(item: Item, new_count: int) ## Emitted when an item is added
 signal item_removed(item: Item, remaining_count: int) ## Emitted when an item is removed
@@ -31,6 +37,11 @@ func _init() -> void:
 
 
 func _ensure_sync() -> void:
+	# Auto-load from save_path once at runtime before any operation touches item data.
+	if not _runtime_loaded and not Engine.is_editor_hint() and save_path != "":
+		_runtime_loaded = true
+		if SaveManager.exists(save_path):
+			load_from_save()
 	# _init() fires before Godot sets @export properties on .tres resources, so item_counts
 	# may be empty and counts may be shorter than items. Rebuild whenever out of sync.
 	if counts.size() != items.size() or (not items.is_empty() and item_counts.is_empty()):
@@ -135,6 +146,7 @@ func add_item(item: Item) -> bool: ## Add an item to the inventory. Stacks onto 
 		counts[slot] += 1
 		item_counts[item_key] = item_counts.get(item_key, 0) + 1
 		item_added.emit(items[slot], item_counts[item_key])
+		_auto_save()
 		return true
 
 	# All existing slots for this item are full (or none exist yet)
@@ -149,6 +161,7 @@ func add_item(item: Item) -> bool: ## Add an item to the inventory. Stacks onto 
 	counts.append(1)
 	item_counts[item_key] = item_counts.get(item_key, 0) + 1
 	item_added.emit(item, item_counts[item_key])
+	_auto_save()
 	return true
 
 
@@ -186,6 +199,7 @@ func remove_item(item: Item, quantity: int = 1) -> bool: ## Remove a specific qu
 		item_counts[item_key] = total_remaining
 
 	item_removed.emit(item, maxi(total_remaining, 0))
+	_auto_save()
 	return true
 
 
@@ -335,6 +349,7 @@ func clear() -> void: ## Remove all items from inventory.
 	counts.clear()
 	item_counts.clear()
 	inventory_cleared.emit()
+	_auto_save()
 
 
 func sort_items() -> void: ## Sort items alphabetically by name.
@@ -459,6 +474,7 @@ func set_slot(index: int, new_item: Item, slot_count: int = 1) -> void: ## Place
 		var new_key := _get_item_key(new_item)
 		item_counts[new_key] = item_counts.get(new_key, 0) + clamped_count
 		item_added.emit(new_item, item_counts[new_key])
+	_auto_save()
 
 
 func merge_from(other_inventory: Inventory) -> int: ## Merge all items from another inventory into this one. Returns number of items successfully merged.
@@ -480,6 +496,30 @@ func split_stack(item: Item, quantity: int, target_inventory: Inventory) -> bool
 			target_inventory.add_item(item)
 		return true
 	return false
+
+
+# ============ PERSISTENCE (SaveManager) ============
+
+func save() -> bool: ## Save inventory to save_path using SaveManager. Returns true on success.
+	if save_path == "":
+		push_warning("Inventory '%s': save_path is not set" % inventory_name)
+		return false
+	return SaveManager.save(save_path, get_save_data())
+
+
+func load_from_save() -> bool: ## Load inventory from save_path using SaveManager. Returns true on success.
+	if save_path == "":
+		push_warning("Inventory '%s': save_path is not set" % inventory_name)
+		return false
+	var data := SaveManager.load(save_path)
+	if data.is_empty():
+		return false
+	return load_from_data(data)
+
+
+func _auto_save() -> void:
+	if auto_save and save_path != "" and not _loading:
+		save()
 
 
 # ============ SAVE / LOAD SYSTEM ============
@@ -557,6 +597,7 @@ func load_from_data(save_data: Dictionary) -> bool: ## Load inventory data from 
 		push_error("Invalid save data format")
 		return false
 
+	_loading = true
 	clear()
 
 	if save_data.has("inventory_name"):
@@ -589,6 +630,7 @@ func load_from_data(save_data: Dictionary) -> bool: ## Load inventory data from 
 
 	_update_item_counts()
 	is_initialized = true
+	_loading = false
 
 	print("Inventory loaded: ", inventory_name, " (", items.size(), " unique items)")
 	return true
