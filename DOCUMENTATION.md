@@ -1,5 +1,5 @@
 # InventoryGodot API Reference
-Generated: 2026-05-20
+Generated: 2026-05-21
 
 Provides an inventory and item resource used for inventory management
 
@@ -15,12 +15,16 @@ Provides an inventory and item resource used for inventory management
 | **max_size** | `int` | `-1` | Maximum number of slots (-1 = unlimited) |
 | **inventory_name** | `String` | `"Default Inventory"` | Name of this inventory for identification |
 | **overflow_mode** | `OverflowMode` | `OverflowMode.ITEM_SETTING` | Overrides each item's overflow_to_new_stack when not set to ITEM_SETTING |
+| **save_path** | `String` | `""` | Filename within SaveManager.save_folder (e.g. "player.json"). Leave empty to auto-derive from inventory_name. |
+| **auto_save** | `bool` | `true` | Automatically save whenever items change. |
 
 ### 💾 Class Variables (Standard)
 | Property | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | **item_counts** | `Dictionary` | `-` | Tracks item counts keyed by item key (runtime cache) |
 | **is_initialized** | `bool` | `false` | Whether inventory has been initialized |
+| **_runtime_loaded** | `bool` | `false` | Whether auto-load has already been attempted this session |
+| **_loading** | `bool` | `false` | True while load_from_data is running, suppresses auto-save |
 
 ### 🔔 Signals
 | Signal | Arguments | Description |
@@ -66,6 +70,8 @@ Provides an inventory and item resource used for inventory management
 | **set_slot()** | `index: int`<br>`new_item: Item`<br>`slot_count: int = 1` | `void` |  Place an item (or null for empty) directly into a slot. slot_count sets the exact quantity for that slot. |
 | **merge_from()** | `other_inventory: Inventory` | `int` |  Merge all items from another inventory into this one. Returns number of items successfully merged. |
 | **split_stack()** | `item: Item`<br>`quantity: int`<br>`target_inventory: Inventory` | `bool` |  Split a stack of items into another inventory. Returns true if successful. |
+| **save()** | - | `bool` |  Save inventory to SaveManager.save_folder using the resolved filename. Returns true on success. |
+| **load_from_save()** | - | `bool` |  Load inventory from SaveManager.save_folder using the resolved filename. Returns true on success. |
 | **save_to_file()** | `file_path: String` | `bool` |  Save inventory to a file. Parameters: file_path: Path to save the inventory (e.g., "user://inventory.save"). Returns true if save successful, false otherwise |
 | **load_from_file()** | `file_path: String` | `bool` |  Load inventory from a file. Parameters: file_path: Path to load the inventory from (e.g., "user://inventory.save"). Returns true if load successful, false otherwise |
 | **get_save_data()** | - | `Dictionary` |  Get inventory data as a Dictionary for saving. Returns Dictionary containing all inventory data |
