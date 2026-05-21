@@ -17,7 +17,7 @@ enum OverflowMode {
 @export var inventory_name: String = "Default Inventory" ## Name of this inventory for identification
 @export var overflow_mode: OverflowMode = OverflowMode.ITEM_SETTING ## Overrides each item's overflow_to_new_stack when not set to ITEM_SETTING
 
-@export_group("Persistence")
+@export_category("Save")
 @export var save_path: String = "" ## Filename within SaveManager.save_folder (e.g. "player.json"). Leave empty to auto-derive from inventory_name.
 @export var auto_save: bool = true ## Automatically save whenever items change.
 
