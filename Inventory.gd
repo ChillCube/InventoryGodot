@@ -236,6 +236,7 @@ func has_items(items_to_check: Array[Item]) -> bool: ## Check if the inventory c
 
 
 func get_item_at(index: int) -> Item: ## Get item at a specific index.
+	_ensure_sync()
 	if index >= 0 and index < items.size():
 		return items[index]
 	return null
@@ -575,6 +576,7 @@ func get_save_data() -> Dictionary: ## Get inventory data as a Dictionary for sa
 	for i in range(items.size()):
 		var item := items[i]
 		if item == null:
+			save_data["items"].append({"empty": true})
 			continue
 		var item_data = {
 			"resource_path": item.resource_path if item.resource_path else "",
@@ -606,6 +608,8 @@ func load_from_data(save_data: Dictionary) -> bool: ## Load inventory data from 
 
 	for item_data in save_data["items"]:
 		if item_data.get("empty", false):
+			items.append(null)
+			counts.append(0)
 			continue
 
 		var item: Item = null
