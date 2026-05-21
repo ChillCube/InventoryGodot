@@ -8,6 +8,9 @@ class_name Item
 @export var sprite: Texture2D ## Icon displayed in inventory slots
 @export var stats: Stats ## Optional Stats resource (e.g. damage, defence) attached to this item
 @export var value: float ## Monetary/trade value of the item
+@export var max_stack: int = 999 ## Maximum quantity per slot (0 = unlimited)
+@export var max_amount: int = 0 ## Maximum total quantity across all slots in an inventory (0 = unlimited)
+@export var overflow_to_new_stack: bool = true ## When a stack is full, create a new slot instead of rejecting the item
 @export var use_trigger_nodes: Array[PackedScene] = [] ## Scenes instantiated and attached to the user when item.use() is called
 
 ## Uses the item, instantiating all trigger nodes and attaching them to the user
