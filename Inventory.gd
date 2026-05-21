@@ -18,8 +18,8 @@ enum OverflowMode {
 @export var overflow_mode: OverflowMode = OverflowMode.ITEM_SETTING ## Overrides each item's overflow_to_new_stack when not set to ITEM_SETTING
 
 @export_group("Persistence")
-@export var save_path: String = "" ## File path for JSON persistence (e.g. "user://inventory.json"). Leave empty to disable.
-@export var auto_save: bool = true ## Automatically save to save_path whenever items change.
+@export var save_path: String = "" ## Filename within SaveManager.save_folder (e.g. "player.json"). Leave empty to auto-derive from inventory_name.
+@export var auto_save: bool = true ## Automatically save whenever items change.
 
 var item_counts: Dictionary ## Tracks item counts keyed by item key (runtime cache)
 var is_initialized: bool = false ## Whether inventory has been initialized
@@ -36,11 +36,16 @@ func _init() -> void:
 	pass
 
 
+func _get_save_filename() -> String:
+	if save_path != "":
+		return save_path
+	return inventory_name.to_lower().replace(" ", "_") + ".json"
+
 func _ensure_sync() -> void:
-	# Auto-load from save_path once at runtime before any operation touches item data.
-	if not _runtime_loaded and not Engine.is_editor_hint() and save_path != "":
+	# Auto-load once at runtime before any operation touches item data.
+	if not _runtime_loaded and not Engine.is_editor_hint():
 		_runtime_loaded = true
-		if SaveManager.exists(save_path):
+		if SaveManager.exists(_get_save_filename()):
 			load_from_save()
 	# _init() fires before Godot sets @export properties on .tres resources, so item_counts
 	# may be empty and counts may be shorter than items. Rebuild whenever out of sync.
@@ -500,25 +505,19 @@ func split_stack(item: Item, quantity: int, target_inventory: Inventory) -> bool
 
 # ============ PERSISTENCE (SaveManager) ============
 
-func save() -> bool: ## Save inventory to save_path using SaveManager. Returns true on success.
-	if save_path == "":
-		push_warning("Inventory '%s': save_path is not set" % inventory_name)
-		return false
-	return SaveManager.save(save_path, get_save_data())
+func save() -> bool: ## Save inventory to SaveManager.save_folder using the resolved filename. Returns true on success.
+	return SaveManager.save(_get_save_filename(), get_save_data())
 
 
-func load_from_save() -> bool: ## Load inventory from save_path using SaveManager. Returns true on success.
-	if save_path == "":
-		push_warning("Inventory '%s': save_path is not set" % inventory_name)
-		return false
-	var data := SaveManager.load(save_path)
+func load_from_save() -> bool: ## Load inventory from SaveManager.save_folder using the resolved filename. Returns true on success.
+	var data := SaveManager.load(_get_save_filename())
 	if data.is_empty():
 		return false
 	return load_from_data(data)
 
 
 func _auto_save() -> void:
-	if auto_save and save_path != "" and not _loading:
+	if auto_save and not _loading:
 		save()
 
 
